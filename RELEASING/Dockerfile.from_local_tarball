@@ -16,7 +16,7 @@
 #
 FROM python:3.6-jessie
 
-RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+RUN sed -i 's#deb.debian.org#mirrors.ustc.edu.cn#g' /etc/apt/sources.list
 RUN sed -i 's#security.debian.org#mirrors.ustc.edu.cn#g' /etc/apt/sources.list
     
 RUN useradd --user-group --create-home --no-log-init --shell /bin/bash superset
@@ -28,7 +28,7 @@ ENV LANG=C.UTF-8 \
 RUN apt-get update -y
 
 # Install dependencies to fix `curl https support error` and `elaying package configuration warning`
-RUN apt-get install -y apt-transport-https apt-utils
+RUN apt-get install -y apt-transport-https apt-utils git vim
 
 # Install superset dependencies
 # https://superset.incubator.apache.org/installation.html#os-dependencies
@@ -39,34 +39,44 @@ RUN apt-get install -y build-essential libssl-dev \
 # https://superset.incubator.apache.org/installation.html#making-your-own-build
 # https://nodejs.org/en/download/package-manager/
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-RUN sed -i 's#deb.nodesource.com/node_12.x#mirrors.tuna.tsinghua.edu.cn/nodesource/deb_12.x#g' /etc/apt/sources.list.d/nodesource.list
+# RUN sed -i 's#deb.nodesource.com/node_12.x#mirrors.tuna.tsinghua.edu.cn/nodesource/deb_12.x#g' /etc/apt/sources.list.d/nodesource.list
 RUN apt-get install -y nodejs
+RUN node --version
 
 RUN mkdir -p /home/superset
 RUN chown superset /home/superset
 
 WORKDIR /home/superset
-ARG VERSION
-ARG SUPERSET_RELEASE_RC_TARBALL
+ARG SUPERSET_RELEASE_GIT_PATH=https://gitee.com/zcfrank1st/superset-kai.git
+ARG MYSQL_URL="mysql://root:my-pass@172.17.0.2:3306/superset_db?charset=UTF8"
 
 # Can fetch source from svn or copy tarball from local mounted directory
-COPY $SUPERSET_RELEASE_RC_TARBALL ./
-RUN tar -xvf *.tar.gz
-WORKDIR /home/superset/apache-superset-incubating-$VERSION/superset-frontend
+RUN git clone $SUPERSET_RELEASE_GIT_PATH
+WORKDIR /home/superset/superset-kai/superset-frontend
 
 RUN npm config set registry https://registry.npm.taobao.org 
-RUN npm ci \
+RUN npm install \
     && npm run build \
     && rm -rf node_modules
 
-WORKDIR /home/superset/apache-superset-incubating-$VERSION
-RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade setuptools pip \
-    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt \
-    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir .
+WORKDIR /home/superset/superset-kai
+RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade setuptools pip \
+    && pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade -r requirements.txt \
+    && pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade --no-cache-dir .
 
-RUN flask fab babel-compile --target superset/translations
+RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade mysqlclient
+
+
+WORKDIR /home/superset/superset-kai/superset
+RUN pybabel compile -d translations
+
 
 ENV PATH=/home/superset/superset/bin:$PATH \
     PYTHONPATH=/home/superset/superset/:$PYTHONPATH
 COPY from_tarball_entrypoint.sh /entrypoint.sh
+
+RUN export MYSQL_URL=$MYSQL_URL
+
+RUN echo ${MYSQL_URL}
+
 ENTRYPOINT ["/entrypoint.sh"]

@@ -32,7 +32,7 @@ superset fab create-admin \
 superset db upgrade
 
 # Loading examples
-superset load_examples
+# superset load_examples
 
 # Create default roles and permissions
 superset init
