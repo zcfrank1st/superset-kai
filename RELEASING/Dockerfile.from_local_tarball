@@ -16,6 +16,9 @@
 #
 FROM python:3.6-jessie
 
+RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+RUN sed -i 's#security.debian.org#mirrors.ustc.edu.cn#g' /etc/apt/sources.list
+    
 RUN useradd --user-group --create-home --no-log-init --shell /bin/bash superset
 
 # Configure environment
@@ -35,8 +38,9 @@ RUN apt-get install -y build-essential libssl-dev \
 # Install nodejs for custom build
 # https://superset.incubator.apache.org/installation.html#making-your-own-build
 # https://nodejs.org/en/download/package-manager/
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
-    && apt-get install -y nodejs
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN sed -i 's#deb.nodesource.com/node_12.x#mirrors.tuna.tsinghua.edu.cn/nodesource/deb_12.x#g' /etc/apt/sources.list.d/nodesource.list
+RUN apt-get install -y nodejs
 
 RUN mkdir -p /home/superset
 RUN chown superset /home/superset
@@ -50,14 +54,15 @@ COPY $SUPERSET_RELEASE_RC_TARBALL ./
 RUN tar -xvf *.tar.gz
 WORKDIR /home/superset/apache-superset-incubating-$VERSION/superset-frontend
 
+RUN npm config set registry https://registry.npm.taobao.org 
 RUN npm ci \
     && npm run build \
     && rm -rf node_modules
 
 WORKDIR /home/superset/apache-superset-incubating-$VERSION
-RUN pip install --upgrade setuptools pip \
-    && pip install -r requirements.txt \
-    && pip install --no-cache-dir .
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade setuptools pip \
+    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt \
+    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir .
 
 RUN flask fab babel-compile --target superset/translations
 
