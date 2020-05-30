@@ -55,7 +55,7 @@ from superset.exceptions import (
     SpatialException,
 )
 from superset.models.helpers import QueryResult
-from superset.typing import VizData
+from superset.typings import VizData
 from superset.utils import core as utils
 from superset.utils.core import (
     DTTM_ALIAS,

@@ -60,11 +60,11 @@ RUN npm install \
     && rm -rf node_modules
 
 WORKDIR /home/superset/superset-kai
-RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade setuptools pip \
-    && pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade -r requirements.txt \
-    && pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade --no-cache-dir .
+RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple setuptools pip \
+    && pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt \
+    && pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir .
 
-RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade mysqlclient
+RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple mysqlclient
 
 
 WORKDIR /home/superset/superset-kai/superset
@@ -78,5 +78,6 @@ COPY from_tarball_entrypoint.sh /entrypoint.sh
 RUN export MYSQL_URL=$MYSQL_URL
 
 RUN echo ${MYSQL_URL}
+RUN python --version
 
 ENTRYPOINT ["/entrypoint.sh"]

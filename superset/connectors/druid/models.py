@@ -54,7 +54,7 @@ from superset.constants import NULL_STRING
 from superset.exceptions import SupersetException
 from superset.models.core import Database
 from superset.models.helpers import AuditMixinNullable, ImportMixin, QueryResult
-from superset.typing import FilterValues
+from superset.typings import FilterValues
 from superset.utils import core as utils, import_datasource
 
 try:

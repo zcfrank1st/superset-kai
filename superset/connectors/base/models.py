@@ -25,7 +25,7 @@ from sqlalchemy.orm import foreign, Query, relationship
 from superset.constants import NULL_STRING
 from superset.models.helpers import AuditMixinNullable, ImportMixin, QueryResult
 from superset.models.slice import Slice
-from superset.typing import FilterValue, FilterValues
+from superset.typings import FilterValue, FilterValues
 from superset.utils import core as utils
 
 METRIC_FORM_DATA_PARAMS = [
