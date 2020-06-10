@@ -64,7 +64,11 @@ RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simp
     && pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt \
     && pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir .
 
+# Datasources
 RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple mysqlclient
+RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple sqlalchemy-clickhouse
+RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple cx_Oracle
+RUN pip --default-timeout=1000 install -i https://pypi.tuna.tsinghua.edu.cn/simple psycopg2
 
 
 WORKDIR /home/superset/superset-kai/superset
